@@ -100,6 +100,7 @@ rm -rf $BUILD_IMG/boot/ramdi*.packed
 rm -rf $BUILD_IMG/Image
 rm -rf $BUILD_IMG/boot/Image
 rm -rf $BUILD_IMG/zip_files/hybridmax/boot.img
+rm -rf $BUILD_IMG/zip_files/boot.img
 rm -rf $BUILD_IMG/zip_files/ramdisk/lib/modules/*
 rm -rf $DTS/.*.tmp
 rm -rf $DTS/.*.cmd

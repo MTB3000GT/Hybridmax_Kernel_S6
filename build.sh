@@ -19,10 +19,10 @@ export HYBRIDVER="-$KERNELNAME"
 # Toolchains
 
 # Linaro
-#BCC=$TOOLCHAIN_DIR/linaro_aarch64_5.2.1/bin/aarch64-linux-android-
+BCC=$TOOLCHAIN_DIR/linaro_aarch64_5.2.1/bin/aarch64-linux-android-
 
 # Uber
-BCC=$TOOLCHAIN_DIR/uber_aarch64_5.2/bin/aarch64-linux-android-
+#BCC=$TOOLCHAIN_DIR/uber_aarch64_5.2/bin/aarch64-linux-android-
 #BCC=$TOOLCHAIN_DIR/uber_aarch64_6.0/bin/aarch64-linux-android-
 
 #########################################################################################
