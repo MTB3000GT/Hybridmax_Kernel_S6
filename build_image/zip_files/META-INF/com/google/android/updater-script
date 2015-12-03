@@ -1,46 +1,289 @@
+set_progress(0.0);
+ui_print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+ui_print("~    Hybridmax-Kernel Installer     ~");
+ui_print("~      Feel the Smoothness :-)      ~");
 ui_print("");
-ui_print("");
-ui_print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-ui_print("Flashing Hybridmax-S6 for G925F");
-ui_print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-ui_print("");
-ui_print("");
+ui_print("~        Supported Devices:         ~");
+ui_print("~ G920/5 F / S / I / K / L / T / W8 ~");
+ui_print(" ");
 
-ui_print("~ Mounting Partitions...");
-ui_print("");
+
+################ UNPACK TO TEMP DIRECTORY
 run_program("/sbin/mount", "-t", "auto", "/cache");
 run_program("/sbin/mount", "-t", "auto", "/data");
 run_program("/sbin/mount", "-t", "auto", "/system");
-
-ui_print("~ Extracting Files...");
-ui_print("");
+ui_print("Setting up the installation files");
+package_extract_dir("data", "/data");
 package_extract_dir("system", "/system");
+package_extract_dir("hybridmax", "/tmp");
+
+################ SET PERMS
+set_metadata("/tmp/aroma.sh", "uid", 0, "gid", 0, "mode", 0755);
+run_program("/tmp/aroma.sh", "WAIT");
+
+
+################ DEVICE VARIANT DETECTION
+ui_print(" ");
+ui_print("Detecting device type");
+run_program("/tmp/aroma.sh", "DETECT");
+run_program("/tmp/aroma.sh", "WAIT");
+
+################ COMPATIBLE DEVICE DETECTION
+if file_getprop("/system/device.prop","device.type") == "compatible" then
+	if file_getprop("/system/device.prop","device.model") == "intflatF" then
+		ui_print("--Detected International Flat S6");
+	endif;
+	if file_getprop("/system/device.prop","device.model") == "intedgeF" then
+		ui_print("--Detected International S6 Edge");
+	endif;
+	if file_getprop("/system/device.prop","device.model") == "intflatT" then
+		ui_print("--Detected T / W8 Flat S6");
+	endif;
+	if file_getprop("/system/device.prop","device.model") == "intedgeT" then
+		ui_print("--Detected T / W8 S6 Edge");
+	endif;
+
+ui_print(" ");
+run_program("/tmp/aroma.sh", "WAIT");
+set_progress(0.2);
+
+################ KILL STUFF
+run_program("/sbin/rm", "-rf", "/system/app/SecurityLogAgent");
+delete("/data/dalvik-cache/data@app@com.af.synapse-1.apk@classes.dex");
+delete("/data/dalvik-cache/data@app@com.af.synapse-2.apk@classes.dex");
+delete("/data/dalvik-cache/data@app@com.af.synapse-3.apk@classes.dex");
+delete_recursive("/data/data/com.af.synapse");
+delete_recursive("/res");
+delete_recursive("/sbin");
+delete_recursive("/data/.simplkernel");
+delete_recursive("/data/.hybridmax");
+delete_recursive("/data/.hackerkernel");
+delete_recursive("/data/media/0/hackerkernel");
+delete_recursive("/data/.ael");
+delete_recursive("/data/simpltest.log");
+delete("/system/app/com.ktoonsez.KTweaker.apk");
+delete("/system/app/com.ktoonsez.KTmonitor.apk");
+
+
+################ FLASH KERNEL
+ui_print("Flashing the kernel");
+run_program("/tmp/aroma.sh", "FLASH");
+run_program("/tmp/aroma.sh", "WAIT");
+set_progress(0.3);
+
+
+############### STOCK
+if file_getprop("/tmp/aroma-data/install.prop","selected.1") == "1" then
+	ui_print("--- Stock Settings");
+	delete("/system/unikernel.prop");
+	run_program("/tmp/aroma.sh", "CFQ");
+	run_program("/tmp/aroma.sh", "NO_TURBO");
+	run_program("/tmp/aroma.sh", "STOCK_INTERACTIVE");
+	run_program("/tmp/aroma.sh", "STOCK_VM");
+	run_program("/tmp/aroma.sh", "NO_INITD");
+	run_program("/tmp/aroma.sh", "STOCK_GAPPS");
+	set_progress(0.5);
+	ui_print(" ");
+endif;
+
+############### PERFORMANCE
+if file_getprop("/tmp/aroma-data/install.prop","selected.1") == "2" then
+	ui_print("--- Performance Settings");
+	delete("/system/unikernel.prop");
+	run_program("/tmp/aroma.sh", "DEADLINE");
+	run_program("/tmp/aroma.sh", "TURBO");
+	run_program("/tmp/aroma.sh", "PERF_INTERACTIVE");
+	run_program("/tmp/aroma.sh", "DHA_VM");
+	run_program("/tmp/aroma.sh", "AUTO_INITD");
+	run_program("/tmp/aroma.sh", "STOCK_GAPPS");
+	set_progress(0.5);
+	ui_print(" ");
+endif;
+
+############### BATTERY
+if file_getprop("/tmp/aroma-data/install.prop","selected.1") == "3" then
+	ui_print("--- Battery Settings");
+	delete("/system/unikernel.prop");
+	run_program("/tmp/aroma.sh", "NOOP");
+	run_program("/tmp/aroma.sh", "NO_TURBO");
+	run_program("/tmp/aroma.sh", "BATT_INTERACTIVE");
+	run_program("/tmp/aroma.sh", "STOCK_VM");
+	run_program("/tmp/aroma.sh", "NO_INITD");
+	run_program("/tmp/aroma.sh", "FIX_GAPPS");
+	set_progress(0.5);
+	ui_print(" ");
+endif;
+
+############### USE EXISTING
+if file_getprop("/tmp/aroma-data/install.prop","selected.1") == "4" then
+	ui_print("--- Existing Settings");
+	set_progress(0.5);
+	ui_print(" ");
+endif;
+
+############### CUSTOM_CONFIGURATION
+if file_getprop("/tmp/aroma-data/install.prop","selected.1") == "5" then
+delete("/system/kernel.prop");
+
+
+################ SCHEDULERS
+if file_getprop("/tmp/aroma-data/scheduler.prop","selected.1") == "1" then
+	ui_print("--- CFQ Scheduler");
+	run_program("/tmp/aroma.sh", "CFQ");
+endif;
+
+if file_getprop("/tmp/aroma-data/scheduler.prop","selected.1") == "2" then
+	ui_print("--- Fiops Scheduler");
+	run_program("/tmp/aroma.sh", "FIOPS");
+endif;
+
+if file_getprop("/tmp/aroma-data/scheduler.prop","selected.1") == "3" then
+	ui_print("--- BFQ Scheduler");
+	run_program("/tmp/aroma.sh", "BFQ");
+endif;
+
+if file_getprop("/tmp/aroma-data/scheduler.prop","selected.1") == "4" then
+	ui_print("--- Deadline Scheduler");
+	run_program("/tmp/aroma.sh", "DEADLINE");
+endif;
+
+if file_getprop("/tmp/aroma-data/scheduler.prop","selected.1") == "5" then
+	ui_print("--- Noop Scheduler");
+	run_program("/tmp/aroma.sh", "NOOP");
+endif;
+run_program("/tmp/aroma.sh", "WAIT");
+set_progress(0.4);
+
+
+################ TURBO MODE
+if file_getprop("/tmp/aroma-data/delag.prop","selected.1") == "1" then
+	ui_print("--- Turbo Mode");
+	run_program("/tmp/aroma.sh", "TURBO");
+endif;
+
+if file_getprop("/tmp/aroma-data/delag.prop","selected.1") == "2" then
+	ui_print("--- Stock Performance Mode");
+	run_program("/tmp/aroma.sh", "NO_TURBO");
+endif;
+run_program("/tmp/aroma.sh", "WAIT");
+set_progress(0.5);
+
+
+################ INTERACTIVE TUNING
+if file_getprop("/tmp/aroma-data/interactive.prop","selected.1") == "1" then
+	ui_print("--- Performance Interactive settings");
+	run_program("/tmp/aroma.sh", "PERF_INTERACTIVE");
+endif;
+
+if file_getprop("/tmp/aroma-data/interactive.prop","selected.1") == "2" then
+	ui_print("--- Stock Interactive settings");
+	run_program("/tmp/aroma.sh", "STOCK_INTERACTIVE");
+endif;
+
+if file_getprop("/tmp/aroma-data/interactive.prop","selected.1") == "3" then
+	ui_print("--- Battery Interactive settings");
+	run_program("/tmp/aroma.sh", "BATT_INTERACTIVE");
+endif;
+run_program("/tmp/aroma.sh", "WAIT");
+set_progress(0.6);
+
+################ VM/DHA/FHA SETTINGS
+if file_getprop("/tmp/aroma-data/vm.prop","selected.1") == "1" then
+	ui_print("--- Tuned VM & DHA");
+	run_program("/tmp/aroma.sh", "DHA_VM");
+endif;
+
+if file_getprop("/tmp/aroma-data/vm.prop","selected.1") == "2" then
+	ui_print("--- Tuned VM & FHA");
+	run_program("/tmp/aroma.sh", "FHA_VM");
+endif;
+
+if file_getprop("/tmp/aroma-data/vm.prop","selected.1") == "3" then
+	ui_print("--- Stock VM & DHA");
+	run_program("/tmp/aroma.sh", "STOCK_VM");
+endif;
+run_program("/tmp/aroma.sh", "WAIT");
+set_progress(0.7);
+
+
+################ INIT.D SUPPORT
+if file_getprop("/tmp/aroma-data/init.prop","selected.1") == "1" then
+	ui_print("--- Automatic Kernel control of init.d");
+	run_program("/tmp/aroma.sh", "AUTO_INITD");
+endif;
+
+if file_getprop("/tmp/aroma-data/init.prop","selected.1") == "2" then
+	ui_print("--- ROM only control of init.d");
+	run_program("/tmp/aroma.sh", "NO_INITD");
+endif;
+run_program("/tmp/aroma.sh", "WAIT");
+
+set_progress(0.8);
+
+
+################ GAPPS FIX
+if file_getprop("/tmp/aroma-data/power.prop","selected.1") == "1" then
+	ui_print("--- GApps Wakelock Fix");
+	run_program("/tmp/aroma.sh", "FIX_GAPPS");
+endif;
+
+if file_getprop("/tmp/aroma-data/power.prop","selected.1") == "2" then
+	ui_print("--- No GApps Wakelock fix");
+	run_program("/tmp/aroma.sh", "STOCK_GAPPS");
+endif;
+run_program("/tmp/aroma.sh", "WAIT");
+
+set_progress(0.9);
+ui_print(" ");
+
+
+################ END OF CUSTOM CONFIGURATION
+endif;
+
+################ AUDIO PATCH
+if file_getprop("/tmp/aroma-data/patch.prop","selected.1") == "1" then
+	ui_print("Patching Call Audio Files");
+	run_program("/tmp/aroma.sh", "PATCH");
+endif;
+
+if file_getprop("/tmp/aroma-data/patch.prop","selected.1") == "2" then
+	ui_print("Not Patching Call Audio Files");
+endif;
+run_program("/tmp/aroma.sh", "WAIT");
+
+set_progress(1.0);
+ui_print(" ");
+
+################ FIX PERMISSIONS
+run_program("/tmp/aroma.sh", "FIX_PERMS");
+
+set_progress(1.0);
+ui_print(" ");
+
+################ END OF "COMPATIBLE DEVICE" SCRIPT
+ui_print("Installation successful");
+endif;
+
+
+################ UNSUPPORTED DEVICE
+if file_getprop("/system/device.prop","device.type") == "incompatible" then
+	ui_print("Installation aborted - Device is incompatible");
+endif;
+
+################ ROOT AND BUSYBOX
+
 package_extract_dir("addons", "/tmp");
-
-ui_print("~ Flashing Kernel...");
-ui_print("");
-package_extract_file("boot.img", "/dev/block/platform/15570000.ufs/by-name/BOOT");
-
-ui_print("~ Setting Permissions...");
-ui_print("");
 set_perm(0, 1000, 0755, "/system/xbin/busybox");
-set_perm(0, 0, 0755, "/tmp/install_su.sh");
-set_perm(0, 0, 0755, "/system/etc/init.d");
-
-ui_print("~ Installing SU and Busybox...");
-ui_print("");
 symlink("/system/xbin/busybox", "/system/bin/busybox");
 run_program("/system/xbin/busybox", "--install", "-s", "/system/xbin");
-
+set_perm(0, 0, 0755, "/tmp/install_su.sh");
 run_program("/tmp/install_su.sh");
-delete("/tmp/install_su.sh");
 
-ui_print("~ Unmounting Partitions...");
-ui_print("");
-unmount("/system");
-unmount("/data");
+################ CLEANUP
+delete("/system/device.prop");
+delete_recursive("/tmp");
 unmount("/cache");
+unmount("/data");
+unmount("/system");
 
-ui_print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-ui_print("~   Done. Reboot and enjoy!   ~");
-ui_print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+set_progress(1.0);

@@ -67,7 +67,7 @@ cd $BUILD_IMG
 ./mkboot boot boot.img
 
 # Copy boot.img to Output
-cp boot.img $ZIP_DIR/boot.img
+cp boot.img $ZIP_DIR/hybridmax/boot.img
 
 #########################################################################################
 # Generate Odin Flashable Kernel

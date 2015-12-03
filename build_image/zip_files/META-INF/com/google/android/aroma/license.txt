@@ -1,0 +1,27 @@
+<@center><b><#selectbg_g>Terms of Service</#></b>
+
+Your warranty is now void.
+
+xda and i are not responsible for bricked devices, dead SD cards or thermonuclear war. Please do some research if you have any concerns about features included in this KERNEL before flashing it! Accept the fact that something might go wrong.
+
+YOU are choosing to make these modifications!!
+
+
+<@center><b><#selectbg_g>READ THIS BEFORE GOING FURTHER</#>
+<@left>
+Do not flash this package if you have a Sprint or Rogers device
+
+<@center><#selectbg_g>CHANGELOG</#></b>
+<@left>
+- Added Aroma package installer
+- Added Preset configurations
+- Added IO Scheduler options
+- Added Turbo Charge option
+- Added Interactive options
+- Added VM / DHA / FHA option
+- Added init.d script control option
+- Added Optional device specific Audio/WiFi Patch
+- Reworked GPU Throttling and DVFS Control
+- Some Wireless optimizations
+- Added Unified Device Support by g.lewarne
+- cpuidle Optimizations
