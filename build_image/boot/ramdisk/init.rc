@@ -218,6 +218,11 @@ on late-init
     trigger early-boot
     trigger boot
 
+service autoroot /system/bin/sh /sbin/autoroot.sh
+    class core
+    user root
+    oneshot
+
 on post-fs
     start sec-sh
     # once everything is setup, no need to modify /
@@ -1355,8 +1360,8 @@ on property:service.vpnclientd.enable=0
 	service reactived /system/bin/reactived
 	class late_start
 
-# Hybridmax Tuning
-service postinit /sbin/ext/post-init.sh
+service post-init /system/bin/sh /sbin/post-init.sh
     class main
     user root
     oneshot
+
