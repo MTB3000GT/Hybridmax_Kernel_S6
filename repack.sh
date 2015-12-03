@@ -26,7 +26,8 @@ rm -rf $BUILD_IMG/output/*.zip
 
 echo "Copy Modules..........................."
 echo
-find . -name "*.ko" -exec cp {} $MODULES_DIR \;
+find -name '*.ko' -exec cp -av {} $MODULES_DIR \;
+${CROSS_COMPILE}strip --strip-unneeded $MODULES_DIR/*
 
 #########################################################################################
 # DT.IMG Generation
