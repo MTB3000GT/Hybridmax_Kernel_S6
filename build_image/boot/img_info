@@ -1,4 +1,4 @@
-kernel=Image
+kernel=kernel
 ramdisk=ramdisk
 dt=dt.img
 page_size=2048

@@ -8,7 +8,7 @@ export TOOLCHAIN_DIR=/home/$BUILD_USER/android/toolchains/arm64
 export CPU_JOB_NUM=$(grep processor /proc/cpuinfo | awk '{field=$NF};END{print field+1}')
 export IMG=arch/arm64/boot
 export BUILD_IMG=build_image
-export KERNEL_DEFCONFIG=hybridmax_defconfig
+export KERNEL_DEFCONFIG=hybridmax_uni_defconfig
 export DEVELOPER="Hybridmax"
 export DEVICE="S6"
 export VERSION_NUMBER="Alpha-1"
@@ -74,7 +74,7 @@ if [ -f "arch/arm64/boot/Image" ]; then
         echo "***********************************"
 	echo "Done, Compilation was successfull!"
         echo "***********************************"
-	cp $IMG/Image $BUILD_IMG/boot/Image
+	cp $IMG/Image $BUILD_IMG/boot/kernel
 else
 	clear
         echo "***********************************"
