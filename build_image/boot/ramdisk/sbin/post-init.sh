@@ -23,6 +23,7 @@ FREQMAXBIG1=/sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq
 FREQMAXBIG2=/sys/devices/system/cpu/cpu5/cpufreq/scaling_max_freq
 FREQMAXBIG3=/sys/devices/system/cpu/cpu6/cpufreq/scaling_max_freq
 FREQMAXBIG4=/sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq
+TCP_CONG=/proc/sys/net/ipv4/tcp_congestion_control
 DATE=$(date)
 LOG=/data/.hybridmax/Hybridmax-Kernel.log
 
@@ -34,6 +35,7 @@ $BB mount -o remount,rw /data
 $BB mount -o remount,rw /
 sync
 
+sleep 1
 ###############################################################################
 # Parse Mode Enforcement from prop
 
@@ -42,27 +44,29 @@ if [ "`grep "kernel.turbo=true" $PROP`" != "" ]; then
 	echo "1" > /sys/devices/system/cpu/cpu4/cpufreq/interactive/enforced_mode
 fi
 
+sleep 1
 ###############################################################################
 # Wait for 5 second so we pass out of init before starting the rest of the script
 
 sleep 5
-
 ###############################################################################
 # Start SuperSU daemon
 
 /system/xbin/daemonsu --auto-daemon &
 
+sleep 1
 ###############################################################################
 # Make internal storage directory.
 
-if [ ! -d /data/.hybridmaxkernel ]; then
+if [ ! -d /data/.hybridmax ]; then
 	mkdir /data/.hybridmax
 	chmod 0777 /data/.hybridmax
 else
 	rm -rf /data/.hybridmax/*
 	chmod 0777 /data/.hybridmax
-fi;
+fi
 
+sleep 1
 ###############################################################################
 # Create Log File
 
@@ -78,17 +82,19 @@ $BB grep ro.product.board /system/build.prop >> $LOG
 echo "=========================" >> $LOG
 echo "" >> $LOG
 
+sleep 1
 ###############################################################################
 # Clean old modules from /system and add new from ramdisk
 
-if [ ! -d /system/lib/modules ]; then
-	$BB mkdir /system/lib/modules
-else
-	$BB rm -rf /system/lib/modules
-	$BB cp -a /lib/modules/*.ko /system/lib/modules/
-	$BB chmod 755 /system/lib/modules/*.ko
-fi
+#if [ ! -d /system/lib/modules ]; then
+#	$BB mkdir /system/lib/modules
+#else
+#	$BB rm -rf /system/lib/modules
+#	$BB cp -a /lib/modules/*.ko /system/lib/modules/
+#	$BB chmod 755 /system/lib/modules/*.ko
+#fi
 
+#sleep 1
 ###############################################################################
 # Parse init/d support from prop
 
@@ -104,6 +110,7 @@ if [ "`grep "kernel.initd=true" $PROP`" != "" ]; then
 	echo "init.d Support enabled successful." >> $LOG
 fi
 
+sleep 1
 ###############################################################################
 # Tune entropy parameters.
 
@@ -111,6 +118,7 @@ echo "512" > /proc/sys/kernel/random/read_wakeup_threshold
 echo "256" > /proc/sys/kernel/random/write_wakeup_threshold
 echo "entropy parameters tuned." >> $LOG
 
+sleep 1
 ###############################################################################
 # No cache flush allowed for write protected devices
 
@@ -118,6 +126,7 @@ echo "temporary none" > /sys/class/scsi_disk/0:0:0:1/cache_type
 echo "temporary none" > /sys/class/scsi_disk/0:0:0:2/cache_type
 echo "cache flush disabled." >> $LOG
 
+sleep 1
 ###############################################################################
 # Synapse Configuration
 
@@ -134,6 +143,7 @@ fi
 
 chmod 777 /data/.hybridmax/bck_prof
 
+sleep 1
 ###############################################################################
 # Critical Permissions fix
 
@@ -148,6 +158,7 @@ $BB chmod 06755 /sbin/busybox
 $BB chmod 06755 /system/xbin/busybox
 echo "Fixing Permissions" >> $LOG
 
+sleep 1
 ###############################################################################
 # Parse Interactive tuning from prop
 
@@ -188,7 +199,6 @@ elif [ "`grep "kernel.interactive=battery" $PROP`" != "" ]; then
 fi
 
 sleep 5
-
 ###############################################################################
 # Parse IO Scheduler from prop
 
@@ -230,6 +240,7 @@ else
     	echo "cfq" > /sys/block/vnswap0/queue/scheduler
 fi
 
+sleep 1
 ###############################################################################
 # Parse Governor from prop
 
@@ -250,6 +261,7 @@ else
 	echo "interactive" > $GOVBIG
 fi
 
+sleep 1
 ###############################################################################
 # Parse CPU CLOCK from prop
 
@@ -265,7 +277,7 @@ else
 	echo "400000" > $FREQMINLITTLE4
 fi
 
-sleep 1;
+sleep 1
 
 if [ "`grep "kernel.cpu.a53.max=1200000" $PROP`" != "" ]; then
 	echo "1200000" > $FREQMAXLITTLE1
@@ -294,7 +306,7 @@ else
 	echo "1500000" > $FREQMAXLITTLE4
 fi
 
-sleep 1;
+sleep 1
 
 if [ "`grep "kernel.cpu.a57.min=800000" $PROP`" != "" ]; then
 	echo "800000" > $FREQMINBIG1
@@ -308,7 +320,7 @@ else
 	echo "800000" > $FREQMINBIG4
 fi
 
-sleep 1;
+sleep 1
 
 if [ "`grep "kernel.cpu.a57.max=1704000" $PROP`" != "" ]; then
 	echo "1704000" > $FREQMAXBIG1
@@ -342,9 +354,27 @@ else
 	echo "2100000" > $FREQMAXBIG4
 fi
 
-sleep 1;
+sleep 1
+###############################################################################
+# Parse TCP Congestion Controller from prop
 
+if [ "`grep "kernel.tcp.cong=bic" $PROP`" != "" ]; then
+	echo "bic" > $TCP_CONG
+elif [ "`grep "kernel.tcp.cong=cubic" $PROP`" != "" ]; then
+	echo "cubic" > $TCP_CONG
+elif [ "`grep "kernel.tcp.cong=westwood" $PROP`" != "" ]; then
+	echo "westwood" > $TCP_CONG
+elif [ "`grep "kernel.tcp.cong=hstcp" $PROP`" != "" ]; then
+	echo "hstcp" > $TCP_CONG
+elif [ "`grep "kernel.tcp.cong=hybla" $PROP`" != "" ]; then
+	echo "hybla" > $TCP_CONG
+elif [ "`grep "kernel.tcp.cong=htcp" $PROP`" != "" ]; then
+	echo "htcp" > $TCP_CONG
+else
+	echo "bic" > $TCP_CONG
+fi
 
+sleep 1
 ###############################################################################
 # Parse VM Tuning from prop
 
@@ -359,6 +389,7 @@ if [ "`grep "kernel.vm=tuned" $PROP`" != "" ]; then
 	echo "48"	> /sys/block/vnswap0/queue/read_ahead_kb
 fi
 
+sleep 1
 ###############################################################################
 # Parse KNOX from prop
 
@@ -389,28 +420,31 @@ if [ "`grep "kernel.knox=true" $PROP`" != "" ]; then
 	echo "KNOX was removed successful." >> $LOG
 fi
 
+sleep 1
 ###############################################################################
 # Stop google service and restart it on boot. this remove high cpu load and ram leak!
 
-if [ "$($BB pidof com.google.android.gms | wc -l)" -eq "1" ]; then
-	$BB kill "$($BB pidof com.google.android.gms)"
-fi;
-if [ "$($BB pidof com.google.android.gms.unstable | wc -l)" -eq "1" ]; then
-	$BB kill "$($BB pidof com.google.android.gms.unstable)"
-fi;
-if [ "$($BB pidof com.google.android.gms.persistent | wc -l)" -eq "1" ]; then
-	$BB kill "$($BB pidof com.google.android.gms.persistent)"
-fi;
-if [ "$($BB pidof com.google.android.gms.wearable | wc -l)" -eq "1" ]; then
-	$BB kill "$($BB pidof com.google.android.gms.wearable)"
-fi
+#if [ "$($BB pidof com.google.android.gms | wc -l)" -eq "1" ]; then
+#	$BB kill "$($BB pidof com.google.android.gms)"
+#fi;
+#if [ "$($BB pidof com.google.android.gms.unstable | wc -l)" -eq "1" ]; then
+#	$BB kill "$($BB pidof com.google.android.gms.unstable)"
+#fi;
+#if [ "$($BB pidof com.google.android.gms.persistent | wc -l)" -eq "1" ]; then
+#	$BB kill "$($BB pidof com.google.android.gms.persistent)"
+#fi;
+#if [ "$($BB pidof com.google.android.gms.wearable | wc -l)" -eq "1" ]; then
+#	$BB kill "$($BB pidof com.google.android.gms.wearable)"
+#fi
 
+#sleep 1
 ###############################################################################
 # Parse GApps wakelock fix from prop
 
 if [ "`grep "kernel.gapps=true" $PROP`" != "" ]; then
 	# Google Services battery drain fixer by Alcolawl@xda
 	# http://forum.xda-developers.com/google-nexus-5/general/script-google-play-services-battery-t3059585/post59563859
+	sleep 60
 	pm enable com.google.android.gms/.update.SystemUpdateActivity
 	pm enable com.google.android.gms/.update.SystemUpdateService
 	pm enable com.google.android.gms/.update.SystemUpdateService$ActiveReceiver
@@ -424,6 +458,7 @@ if [ "`grep "kernel.gapps=true" $PROP`" != "" ]; then
 	echo "GApps Fix applied." >> $LOG
 fi
 
+sleep 1
 ###############################################################################
 # Script finish here, so let me know when
 

@@ -137,6 +137,26 @@ elif [ "$1" = "A57-2100" ]; then
 	echo "kernel.cpu.a57.max=2100000" >> $PROP
 sleep 0.7
 
+# TCP Congestion Controller
+elif [ "$1" = "TCP-BIC" ]; then
+	echo "kernel.tcp.cong=bic" >> $PROP
+
+elif [ "$1" = "TCP-CUBIC" ]; then
+	echo "kernel.tcp.cong=cubic" >> $PROP
+
+elif [ "$1" = "TCP-WESTWOOD" ]; then
+	echo "kernel.tcp.cong=westwood" >> $PROP
+
+elif [ "$1" = "TCP-HSTCP" ]; then
+	echo "kernel.tcp.cong=hstcp" >> $PROP
+
+elif [ "$1" = "TCP-HYBLA" ]; then
+	echo "kernel.tcp.cong=hybla" >> $PROP
+
+elif [ "$1" = "TCP-HTCP" ]; then
+	echo "kernel.tcp.cong=htcp" >> $PROP
+sleep 0.7
+
 # TURBO MODE
 elif [ "$1" = "TURBO" ]; then
 	echo "kernel.turbo=true" >> $PROP

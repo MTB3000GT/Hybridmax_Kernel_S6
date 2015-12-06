@@ -139,6 +139,19 @@ if prop("install.prop","selected.1")=="5" then
 	"2100 MHz",      		"Use 2100 MHz",		1	#-- selected.1 = 5
 	);
 
+	selectbox(
+	"Default TCP Congestion Controller",
+	"Select your preferred TCP Cong.",
+	"icons/update",
+	"tcpcong.prop",
+	"Which TCP Cong?",	"",			        2, #-- Group 1. key = "selected.1"
+	"bic",		"bic TCP Congestion Controller",	1,	#-- selected.1 = 1
+	"cubic",	"cubic TCP Congestion Controller",	0,	#-- selected.1 = 2
+	"westwood",	"westwood TCP Congestion Controller",	0,	#-- selected.1 = 3
+	"hstcp",	"hstcp TCP Congestion Controller",	0,	#-- selected.1 = 4
+	"hybla",	"hybla TCP Congestion Controller",	0,	#-- selected.1 = 5
+	"htcp",		"htcp TCP Congestion Controller",	0	#-- selected.1 = 6
+	);
 
 	selectbox(
 	"Control of init.d script support",
