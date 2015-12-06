@@ -5,13 +5,13 @@
 export KERNEL_DIR=$(pwd)
 export BUILD_USER="$USER"
 export TOOLCHAIN_DIR=/home/$BUILD_USER/android/toolchains/arm64
-export CPU_JOB_NUM=$(grep processor /proc/cpuinfo | awk '{field=$NF};END{print field+1}')
+export CPU_JOB_NUM=`grep processor /proc/cpuinfo|wc -l`
 export IMG=arch/arm64/boot
 export BUILD_IMG=build_image
 export KERNEL_DEFCONFIG=hybridmax_uni_defconfig
 export DEVELOPER="Hybridmax"
 export DEVICE="S6"
-export VERSION_NUMBER="Alpha-1"
+export VERSION_NUMBER="Alpha-2"
 export KERNELNAME="$DEVELOPER-$DEVICE-$VERSION_NUMBER"
 export HYBRIDVER="-$KERNELNAME"
 
@@ -19,11 +19,11 @@ export HYBRIDVER="-$KERNELNAME"
 # Toolchains
 
 # Linaro
-BCC=$TOOLCHAIN_DIR/linaro_aarch64_5.2.1/bin/aarch64-linux-android-
+#BCC=$TOOLCHAIN_DIR/linaro_aarch64_5.2.1/bin/aarch64-linux-android-
 
 # Uber
 #BCC=$TOOLCHAIN_DIR/uber_aarch64_5.2/bin/aarch64-linux-android-
-#BCC=$TOOLCHAIN_DIR/uber_aarch64_6.0/bin/aarch64-linux-android-
+BCC=$TOOLCHAIN_DIR/uber_aarch64_6.0/bin/aarch64-linux-android-
 
 #########################################################################################
 # Cleanup

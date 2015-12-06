@@ -8,18 +8,18 @@ export IMG=arch/arm64/boot
 export BUILD_IMG=build_image
 export DTS=arch/arm64/boot/dts
 export ZIP_DIR=zip_files
-export MODULES_DIR=build_image/ramdisk/lib/modules/
+export MODULES_DIR=build_image/zip_files/system/lib/modules/
 export DEVELOPER="Hybridmax"
 export DEVICE="S6"
-export VERSION_NUMBER="Alpha-1"
+export VERSION_NUMBER="Alpha-2"
 export HYBRIDVER="$DEVELOPER-Kernel-$DEVICE-$VERSION_NUMBER-($CURDATE)"
 export KERNEL_NAME="$HYBRIDVER"
 
 #########################################################################################
 # Clean old zip & tar Files
 
-rm -rf $BUILD_IMG/output/*.tar
-rm -rf $BUILD_IMG/output/*.zip
+rm -rf $BUILD_IMG/output_kernel/*.tar
+rm -rf $BUILD_IMG/output_kernel/*.zip
 
 #########################################################################################
 # Copy Modules
@@ -105,6 +105,7 @@ rm -rf $BUILD_IMG/boot/kernel
 rm -rf $BUILD_IMG/zip_files/hybridmax/boot.img
 rm -rf $BUILD_IMG/zip_files/boot.img
 rm -rf $BUILD_IMG/zip_files/ramdisk/lib/modules/*
+rm -rf $BUILD_IMG/zip_files/system/lib/modules/*
 rm -rf $DTS/.*.tmp
 rm -rf $DTS/.*.cmd
 rm -rf $DTS/*.dtb
