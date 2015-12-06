@@ -5,6 +5,24 @@
 #vars
 BB=/system/xbin/busybox
 PROP=/system/kernel.prop
+GOVLITTLE=/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+GOVBIG=/sys/devices/system/cpu/cpu4/cpufreq/scaling_governor
+FREQMINLITTLE1=/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq
+FREQMINLITTLE2=/sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq
+FREQMINLITTLE3=/sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq
+FREQMINLITTLE4=/sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq
+FREQMAXLITTLE1=/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+FREQMAXLITTLE2=/sys/devices/system/cpu/cpu1/cpufreq/scaling_max_freq
+FREQMAXLITTLE3=/sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
+FREQMAXLITTLE4=/sys/devices/system/cpu/cpu3/cpufreq/scaling_max_freq
+FREQMINBIG1=/sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq
+FREQMINBIG2=/sys/devices/system/cpu/cpu5/cpufreq/scaling_min_freq
+FREQMINBIG3=/sys/devices/system/cpu/cpu6/cpufreq/scaling_min_freq
+FREQMINBIG4=/sys/devices/system/cpu/cpu7/cpufreq/scaling_min_freq
+FREQMAXBIG1=/sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq
+FREQMAXBIG2=/sys/devices/system/cpu/cpu5/cpufreq/scaling_max_freq
+FREQMAXBIG3=/sys/devices/system/cpu/cpu6/cpufreq/scaling_max_freq
+FREQMAXBIG4=/sys/devices/system/cpu/cpu7/cpufreq/scaling_max_freq
 DATE=$(date)
 LOG=/data/.hybridmax/Hybridmax-Kernel.log
 
@@ -118,6 +136,7 @@ chmod 777 /data/.hybridmax/bck_prof
 
 ###############################################################################
 # Critical Permissions fix
+
 $BB chown -R root:root /tmp
 $BB chown -R root:root /res
 $BB chown -R root:root /sbin
@@ -176,19 +195,155 @@ sleep 5
 if [ "`grep "kernel.scheduler=noop" $PROP`" != "" ]; then
 	echo "noop" > /sys/block/mmcblk0/queue/scheduler
     	echo "noop" > /sys/block/sda/queue/scheduler
+    	echo "noop" > /sys/block/sdb/queue/scheduler
+    	echo "noop" > /sys/block/sdc/queue/scheduler
+    	echo "noop" > /sys/block/vnswap0/queue/scheduler
 elif [ "`grep "kernel.scheduler=fiops" $PROP`" != "" ]; then
 	echo "fiops" > /sys/block/mmcblk0/queue/scheduler
     	echo "fiops" > /sys/block/sda/queue/scheduler
-elif [ "`grep "kernel.scheduler=bfq" $PROP`" != "" ]; then
-	echo "bfq" > /sys/block/mmcblk0/queue/scheduler
-    	echo "bfq" > /sys/block/sda/queue/scheduler
+    	echo "fiops" > /sys/block/sdb/queue/scheduler
+    	echo "fiops" > /sys/block/sdc/queue/scheduler
+    	echo "fiops" > /sys/block/vnswap0/queue/scheduler
 elif [ "`grep "kernel.scheduler=deadline" $PROP`" != "" ]; then
 	echo "deadline" > /sys/block/mmcblk0/queue/scheduler
     	echo "deadline" > /sys/block/sda/queue/scheduler
+    	echo "deadline" > /sys/block/sdb/queue/scheduler
+    	echo "deadline" > /sys/block/sdc/queue/scheduler
+    	echo "deadline" > /sys/block/vnswap0/queue/scheduler
+elif [ "`grep "kernel.scheduler=bfq" $PROP`" != "" ]; then
+	echo "bfq" > /sys/block/mmcblk0/queue/scheduler
+    	echo "bfq" > /sys/block/sda/queue/scheduler
+    	echo "bfq" > /sys/block/sdb/queue/scheduler
+    	echo "bfq" > /sys/block/sdc/queue/scheduler
+    	echo "bfq" > /sys/block/vnswap0/queue/scheduler
+elif [ "`grep "kernel.scheduler=cfg" $PROP`" != "" ]; then
+	echo "cfq" > /sys/block/mmcblk0/queue/scheduler
+    	echo "cfq" > /sys/block/sda/queue/scheduler
+    	echo "cfq" > /sys/block/sdb/queue/scheduler
+    	echo "cfq" > /sys/block/sdc/queue/scheduler
+    	echo "cfq" > /sys/block/vnswap0/queue/scheduler
 else
 	echo "cfq" > /sys/block/mmcblk0/queue/scheduler
     	echo "cfq" > /sys/block/sda/queue/scheduler
+    	echo "cfq" > /sys/block/sdb/queue/scheduler
+    	echo "cfq" > /sys/block/sdc/queue/scheduler
+    	echo "cfq" > /sys/block/vnswap0/queue/scheduler
 fi
+
+###############################################################################
+# Parse Governor from prop
+
+if [ "`grep "kernel.governor=conservative" $PROP`" != "" ]; then
+	echo "conservative" > $GOVLITTLE
+	echo "conservative" > $GOVBIG
+elif [ "`grep "kernel.governor=interactive" $PROP`" != "" ]; then
+	echo "interactive" > $GOVLITTLE
+	echo "interactive" > $GOVBIG
+elif [ "`grep "kernel.governor=ondemand" $PROP`" != "" ]; then
+	echo "ondemand" > $GOVLITTLE
+	echo "ondemand" > $GOVBIG
+elif [ "`grep "kernel.governor=performance" $PROP`" != "" ]; then
+	echo "performance" > $GOVLITTLE
+	echo "performance" > $GOVBIG
+else 
+	echo "interactive" > $GOVLITTLE
+	echo "interactive" > $GOVBIG
+fi
+
+###############################################################################
+# Parse CPU CLOCK from prop
+
+if [ "`grep "kernel.cpu.a53.min=400000" $PROP`" != "" ]; then
+	echo "400000" > $FREQMINLITTLE1
+	echo "400000" > $FREQMINLITTLE2
+	echo "400000" > $FREQMINLITTLE3
+	echo "400000" > $FREQMINLITTLE4
+else
+	echo "400000" > $FREQMINLITTLE1
+	echo "400000" > $FREQMINLITTLE2
+	echo "400000" > $FREQMINLITTLE3
+	echo "400000" > $FREQMINLITTLE4
+fi
+
+sleep 1;
+
+if [ "`grep "kernel.cpu.a53.max=1200000" $PROP`" != "" ]; then
+	echo "1200000" > $FREQMAXLITTLE1
+	echo "1200000" > $FREQMAXLITTLE2
+	echo "1200000" > $FREQMAXLITTLE3
+	echo "1200000" > $FREQMAXLITTLE4
+elif [ "`grep "kernel.cpu.a53.min=1296000" $PROP`" != "" ]; then
+	echo "1296000" > $FREQMAXLITTLE1
+	echo "1296000" > $FREQMAXLITTLE2
+	echo "1296000" > $FREQMAXLITTLE3
+	echo "1296000" > $FREQMAXLITTLE4
+elif [ "`grep "kernel.cpu.a53.min=1400000" $PROP`" != "" ]; then
+	echo "1400000" > $FREQMAXLITTLE1
+	echo "1400000" > $FREQMAXLITTLE2
+	echo "1400000" > $FREQMAXLITTLE3
+	echo "1400000" > $FREQMAXLITTLE4
+elif [ "`grep "kernel.cpu.a53.min=1500000" $PROP`" != "" ]; then
+	echo "1500000" > $FREQMAXLITTLE1
+	echo "1500000" > $FREQMAXLITTLE2
+	echo "1500000" > $FREQMAXLITTLE3
+	echo "1500000" > $FREQMAXLITTLE4
+else
+	echo "1500000" > $FREQMAXLITTLE1
+	echo "1500000" > $FREQMAXLITTLE2
+	echo "1500000" > $FREQMAXLITTLE3
+	echo "1500000" > $FREQMAXLITTLE4
+fi
+
+sleep 1;
+
+if [ "`grep "kernel.cpu.a57.min=800000" $PROP`" != "" ]; then
+	echo "800000" > $FREQMINBIG1
+	echo "800000" > $FREQMINBIG2
+	echo "800000" > $FREQMINBIG3
+	echo "800000" > $FREQMINBIG4
+else
+	echo "800000" > $FREQMINBIG1
+	echo "800000" > $FREQMINBIG2
+	echo "800000" > $FREQMINBIG3
+	echo "800000" > $FREQMINBIG4
+fi
+
+sleep 1;
+
+if [ "`grep "kernel.cpu.a57.max=1704000" $PROP`" != "" ]; then
+	echo "1704000" > $FREQMAXBIG1
+	echo "1704000" > $FREQMAXBIG2
+	echo "1704000" > $FREQMAXBIG3
+	echo "1704000" > $FREQMAXBIG4
+elif [ "`grep "kernel.cpu.a57.max=1800000" $PROP`" != "" ]; then
+	echo "1800000" > $FREQMAXBIG1
+	echo "1800000" > $FREQMAXBIG2
+	echo "1800000" > $FREQMAXBIG3
+	echo "1800000" > $FREQMAXBIG4
+elif [ "`grep "kernel.cpu.a57.max=1896000" $PROP`" != "" ]; then
+	echo "1896000" > $FREQMAXBIG1
+	echo "1896000" > $FREQMAXBIG2
+	echo "1896000" > $FREQMAXBIG3
+	echo "1896000" > $FREQMAXBIG4
+elif [ "`grep "kernel.cpu.a57.max=2000000" $PROP`" != "" ]; then
+	echo "2000000" > $FREQMAXBIG1
+	echo "2000000" > $FREQMAXBIG2
+	echo "2000000" > $FREQMAXBIG3
+	echo "2000000" > $FREQMAXBIG4
+elif [ "`grep "kernel.cpu.a57.max=2100000" $PROP`" != "" ]; then
+	echo "2100000" > $FREQMAXBIG1
+	echo "2100000" > $FREQMAXBIG2
+	echo "2100000" > $FREQMAXBIG3
+	echo "2100000" > $FREQMAXBIG4
+else
+	echo "2100000" > $FREQMAXBIG1
+	echo "2100000" > $FREQMAXBIG2
+	echo "2100000" > $FREQMAXBIG3
+	echo "2100000" > $FREQMAXBIG4
+fi
+
+sleep 1;
+
 
 ###############################################################################
 # Parse VM Tuning from prop
@@ -233,14 +388,6 @@ if [ "`grep "kernel.knox=true" $PROP`" != "" ]; then
 	rm -rf container/*KNOX*
 	echo "KNOX was removed successful." >> $LOG
 fi
-
-###############################################################################
-# faster I/O (dorimanx)
-
-for i in /sys/block/*/queue; do
-	echo "2" > $i/rq_affinity
-	echo "I/O tuned successful." >> $LOG
-done
 
 ###############################################################################
 # Stop google service and restart it on boot. this remove high cpu load and ram leak!
