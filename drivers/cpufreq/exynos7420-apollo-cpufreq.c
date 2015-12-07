@@ -16,6 +16,7 @@
 #include <linux/slab.h>
 #include <linux/cpufreq.h>
 #include <linux/clk-private.h>
+#include <linux/clocker.h>
 
 #include <mach/map.h>
 #include <mach/regs-clock.h>
@@ -72,12 +73,12 @@ static struct apll_freq exynos7420_apll_freq_CA53[] = {
 	 * PLL M, P, S values are NOT used, Instead CCF clk_set_rate is used
 	 */
 	APLL_FREQ(2000, 0, 0, 2, 5, 5, 5, 5, 0, 1, 4, 0,   0, 0, 0),  /* ARM L0: 2.0GHz   */
-	APLL_FREQ(1900, 0, 0, 2, 5, 5, 5, 5, 0, 1, 4, 0,   0, 0, 0),  /* ARM L1: 1.9GMHz  */
-	APLL_FREQ(1800, 0, 0, 2, 5, 5, 5, 5, 0, 1, 4, 0, 150, 2, 0),  /* ARM L2: 1.8GMHz  */
+	APLL_FREQ(1900, 0, 0, 2, 5, 5, 5, 5, 0, 1, 4, 0,   0, 0, 0),  /* ARM L1: 1.9GHz  */
+	APLL_FREQ(1800, 0, 0, 2, 5, 5, 5, 5, 0, 1, 4, 0, 150, 2, 0),  /* ARM L2: 1.8GHz  */
 	APLL_FREQ(1704, 0, 0, 2, 5, 5, 5, 5, 0, 1, 4, 0, 142, 2, 0),  /* ARM L3: 1.7GHz   */
 	APLL_FREQ(1600, 0, 0, 2, 5, 5, 5, 5, 0, 1, 3, 0, 200, 3, 0),  /* ARM L4: 1.6GHz   */
-	APLL_FREQ(1500, 0, 0, 2, 5, 5, 5, 5, 0, 1, 3, 0, 250, 4, 0),  /* ARM L5: 1.5GMHz  */
-	APLL_FREQ(1400, 0, 0, 2, 5, 5, 5, 5, 0, 1, 3, 0, 175, 3, 0),  /* ARM L6: 1.4GMHz  */
+	APLL_FREQ(1500, 0, 0, 2, 5, 5, 5, 5, 0, 1, 3, 0, 250, 4, 0),  /* ARM L5: 1.5GHz  */
+	APLL_FREQ(1400, 0, 0, 2, 5, 5, 5, 5, 0, 1, 3, 0, 175, 3, 0),  /* ARM L6: 1.4GHz  */
 	APLL_FREQ(1296, 0, 0, 2, 5, 5, 5, 5, 0, 1, 3, 0, 108, 2, 0),  /* ARM L7: 1.3GHz   */
 	APLL_FREQ(1200, 0, 0, 2, 5, 5, 5, 5, 0, 1, 3, 0, 100, 2, 0),  /* ARM L8: 1.2GHz   */
 	APLL_FREQ(1104, 0, 0, 2, 5, 5, 5, 5, 0, 1, 3, 0,  92, 2, 0),  /* ARM L9: 1.1GHz   */
@@ -299,10 +300,11 @@ static void __init set_volt_table_CA53(void)
 	case 5 :
 		max_support_idx_CA53 = L8; break;	/* 1.2GHz */
 	default :
-		max_support_idx_CA53 = L5;	/* 1.5GHz */
+		max_support_idx_CA53 = EXYNOS7420_CPU_MAX_FREQ_LITTLE;
 	}
 
-	min_support_idx_CA53 = L16;	/* 400MHz */
+	min_support_idx_CA53 = EXYNOS7420_CPU_MIN_FREQ_LITTLE;
+
 	pr_info("CPUFREQ of CA53 max_freq : L%d %u khz\n", max_support_idx_CA53,
 		exynos7420_freq_table_CA53[max_support_idx_CA53].frequency);
 	pr_info("CPUFREQ of CA53 min_freq : L%d %u khz\n", min_support_idx_CA53,
