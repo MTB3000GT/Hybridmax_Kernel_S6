@@ -265,7 +265,18 @@ sleep 1
 ###############################################################################
 # Parse CPU CLOCK from prop
 
-if [ "`grep "kernel.cpu.a53.min=400000" $PROP`" != "" ]; then
+# a53-min
+if [ "`grep "kernel.cpu.a53.min=200000" $PROP`" != "" ]; then
+	echo "200000" > $FREQMINLITTLE1
+	echo "200000" > $FREQMINLITTLE2
+	echo "200000" > $FREQMINLITTLE3
+	echo "200000" > $FREQMINLITTLE4
+elif [ "`grep "kernel.cpu.a53.min=300000" $PROP`" != "" ]; then
+	echo "300000" > $FREQMINLITTLE1
+	echo "300000" > $FREQMINLITTLE2
+	echo "300000" > $FREQMINLITTLE3
+	echo "300000" > $FREQMINLITTLE4
+elif [ "`grep "kernel.cpu.a53.min=400000" $PROP`" != "" ]; then
 	echo "400000" > $FREQMINLITTLE1
 	echo "400000" > $FREQMINLITTLE2
 	echo "400000" > $FREQMINLITTLE3
@@ -277,8 +288,9 @@ else
 	echo "400000" > $FREQMINLITTLE4
 fi
 
-sleep 1
+sleep 1;
 
+# a53-max
 if [ "`grep "kernel.cpu.a53.max=1200000" $PROP`" != "" ]; then
 	echo "1200000" > $FREQMAXLITTLE1
 	echo "1200000" > $FREQMAXLITTLE2
@@ -299,6 +311,11 @@ elif [ "`grep "kernel.cpu.a53.min=1500000" $PROP`" != "" ]; then
 	echo "1500000" > $FREQMAXLITTLE2
 	echo "1500000" > $FREQMAXLITTLE3
 	echo "1500000" > $FREQMAXLITTLE4
+elif [ "`grep "kernel.cpu.a53.min=1600000" $PROP`" != "" ]; then
+	echo "1600000" > $FREQMAXLITTLE1
+	echo "1600000" > $FREQMAXLITTLE2
+	echo "1600000" > $FREQMAXLITTLE3
+	echo "1600000" > $FREQMAXLITTLE4
 else
 	echo "1500000" > $FREQMAXLITTLE1
 	echo "1500000" > $FREQMAXLITTLE2
@@ -306,9 +323,40 @@ else
 	echo "1500000" > $FREQMAXLITTLE4
 fi
 
-sleep 1
+sleep 1;
 
-if [ "`grep "kernel.cpu.a57.min=800000" $PROP`" != "" ]; then
+# a57-min
+if [ "`grep "kernel.cpu.a57.min=200000" $PROP`" != "" ]; then
+	echo "200000" > $FREQMINBIG1
+	echo "200000" > $FREQMINBIG2
+	echo "200000" > $FREQMINBIG3
+	echo "200000" > $FREQMINBIG4
+elif [ "`grep "kernel.cpu.a57.min=300000" $PROP`" != "" ]; then
+	echo "300000" > $FREQMINBIG1
+	echo "300000" > $FREQMINBIG2
+	echo "300000" > $FREQMINBIG3
+	echo "300000" > $FREQMINBIG4
+elif [ "`grep "kernel.cpu.a57.min=400000" $PROP`" != "" ]; then
+	echo "400000" > $FREQMINBIG1
+	echo "400000" > $FREQMINBIG2
+	echo "400000" > $FREQMINBIG3
+	echo "400000" > $FREQMINBIG4
+elif [ "`grep "kernel.cpu.a57.min=500000" $PROP`" != "" ]; then
+	echo "500000" > $FREQMINBIG1
+	echo "500000" > $FREQMINBIG2
+	echo "500000" > $FREQMINBIG3
+	echo "500000" > $FREQMINBIG4
+elif [ "`grep "kernel.cpu.a57.min=600000" $PROP`" != "" ]; then
+	echo "600000" > $FREQMINBIG1
+	echo "600000" > $FREQMINBIG2
+	echo "600000" > $FREQMINBIG3
+	echo "600000" > $FREQMINBIG4
+elif [ "`grep "kernel.cpu.a57.min=700000" $PROP`" != "" ]; then
+	echo "700000" > $FREQMINBIG1
+	echo "700000" > $FREQMINBIG2
+	echo "700000" > $FREQMINBIG3
+	echo "700000" > $FREQMINBIG4
+elif [ "`grep "kernel.cpu.a57.min=800000" $PROP`" != "" ]; then
 	echo "800000" > $FREQMINBIG1
 	echo "800000" > $FREQMINBIG2
 	echo "800000" > $FREQMINBIG3
@@ -320,8 +368,9 @@ else
 	echo "800000" > $FREQMINBIG4
 fi
 
-sleep 1
+sleep 1;
 
+# a57-max
 if [ "`grep "kernel.cpu.a57.max=1704000" $PROP`" != "" ]; then
 	echo "1704000" > $FREQMAXBIG1
 	echo "1704000" > $FREQMAXBIG2
@@ -347,6 +396,16 @@ elif [ "`grep "kernel.cpu.a57.max=2100000" $PROP`" != "" ]; then
 	echo "2100000" > $FREQMAXBIG2
 	echo "2100000" > $FREQMAXBIG3
 	echo "2100000" > $FREQMAXBIG4
+elif [ "`grep "kernel.cpu.a57.max=2200000" $PROP`" != "" ]; then
+	echo "2200000" > $FREQMAXBIG1
+	echo "2200000" > $FREQMAXBIG2
+	echo "2200000" > $FREQMAXBIG3
+	echo "2200000" > $FREQMAXBIG4
+elif [ "`grep "kernel.cpu.a57.max=2304000" $PROP`" != "" ]; then
+	echo "2304000" > $FREQMAXBIG1
+	echo "2304000" > $FREQMAXBIG2
+	echo "2304000" > $FREQMAXBIG3
+	echo "2304000" > $FREQMAXBIG4
 else
 	echo "2100000" > $FREQMAXBIG1
 	echo "2100000" > $FREQMAXBIG2
@@ -354,7 +413,7 @@ else
 	echo "2100000" > $FREQMAXBIG4
 fi
 
-sleep 1
+sleep 1;
 ###############################################################################
 # Parse TCP Congestion Controller from prop
 

@@ -1,8 +1,8 @@
 ini_set("rom_name",		"Hybridmax-Kernel");
-ini_set("rom_version",		"Alpha1");
+ini_set("rom_version",		"v2-Beta2");
 ini_set("rom_author",		"Hybridmax");
 ini_set("rom_device",		"Samsung Galaxy S6 G92x F/I/T/K/L/S/W8");
-ini_set("rom_date",		"Dec, 03, 2015");
+ini_set("rom_date",		"Dec, 07, 2015");
 ##
 
 fontresload( "0", "ttf/DroidSans.ttf;", "12" ); #-- Use sets of font (Font Family)
@@ -99,7 +99,9 @@ if prop("install.prop","selected.1")=="5" then
 	"icons/update",
 	"a53freqmin.prop",
 	"Which min Freq A53 Cluster?",	"",			2, #-- Group 1. key = "selected.1"
-	"400 MHz",      		"Use 400 MHz",		1	#-- selected.1 = 1
+	"200 MHz",			"Use 200 MHz",		0,	#-- selected.1 = 1
+	"300 MHz",      		"Use 300 MHz",		0,	#-- selected.1 = 2
+	"400 MHz",      		"Use 400 MHz",		1	#-- selected.1 = 3
 	);
 
 	selectbox(
@@ -111,7 +113,8 @@ if prop("install.prop","selected.1")=="5" then
 	"1200 MHz",      		"Use 1200 MHz",		0,	#-- selected.1 = 1
 	"1296 MHz",      		"Use 1296 MHz",		0,	#-- selected.1 = 2
 	"1400 MHz",      		"Use 1400 MHz",		0,	#-- selected.1 = 3
-	"1500 MHz",      		"Use 1500 MHz",		1	#-- selected.1 = 4
+	"1500 MHz",      		"Use 1500 MHz",		1,	#-- selected.1 = 4
+	"1600 MHz",      		"Use 1600 MHz",		0	#-- selected.1 = 5
 	);
 
 
@@ -123,7 +126,13 @@ if prop("install.prop","selected.1")=="5" then
 	"icons/update",
 	"a57freqmin.prop",
 	"Which min Freq A57 Cluster?",	"",			2, #-- Group 1. key = "selected.1"
-	"800 MHz",      		"Use 800 MHz",		1	#-- selected.1 = 1
+	"200 MHz",			"Use 200 MHz",	0,	#-- selected.1 = 1
+	"300 MHz",      		"Use 300 MHz",	0,	#-- selected.1 = 2
+	"400 MHz",      		"Use 400 MHz",	0,	#-- selected.1 = 3
+	"500 MHz",      		"Use 500 MHz",	0,	#-- selected.1 = 4
+	"600 MHz",      		"Use 600 MHz",	0,	#-- selected.1 = 5
+	"700 MHz",  	    		"Use 700 MHz",	0,	#-- selected.1 = 6
+	"800 MHz",      		"Use 800 MHz",	1	#-- selected.1 = 7
 	);
 
 	selectbox(
@@ -136,7 +145,9 @@ if prop("install.prop","selected.1")=="5" then
 	"1800 MHz",      		"Use 1800 MHz",		0,	#-- selected.1 = 2
 	"1896 MHz",      		"Use 1896 MHz",		0,	#-- selected.1 = 3
 	"2000 MHz",      		"Use 2000 MHz",		0,	#-- selected.1 = 4
-	"2100 MHz",      		"Use 2100 MHz",		1	#-- selected.1 = 5
+	"2100 MHz",      		"Use 2100 MHz",		1,	#-- selected.1 = 5
+	"2200 MHz",      		"Use 2200 MHz (OC)",	0,	#-- selected.1 = 6
+	"2304 MHz",      		"Use 2304 MHz (OC)",	0	#-- selected.1 = 7
 	);
 
 	selectbox(

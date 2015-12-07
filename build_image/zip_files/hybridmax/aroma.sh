@@ -86,7 +86,7 @@ elif [ "$1" = "FIOPS" ]; then
 elif [ "$1" = "NOOP" ]; then
 	echo "kernel.scheduler=noop" >> $PROP
 
-# GOVS
+# GOVERNORS
 elif [ "$1" = "CONSERVATIVE" ]; then
 	echo "kernel.governor=conservative" >> $PROP
 
@@ -101,6 +101,13 @@ elif [ "$1" = "PERFORMANCE" ]; then
 sleep 0.7
 
 # CPU CLOCK A53
+
+elif [ "$1" = "A53-200" ]; then
+	echo "kernel.cpu.a53.min=200000" >> $PROP
+
+elif [ "$1" = "A53-300" ]; then
+	echo "kernel.cpu.a53.min=300000" >> $PROP
+
 elif [ "$1" = "A53-400" ]; then
 	echo "kernel.cpu.a53.min=400000" >> $PROP
 
@@ -115,9 +122,31 @@ elif [ "$1" = "A53-1400" ]; then
 
 elif [ "$1" = "A53-1500" ]; then
 	echo "kernel.cpu.a53.max=1500000" >> $PROP
+
+elif [ "$1" = "A53-1600" ]; then
+	echo "kernel.cpu.a53.max=1600000" >> $PROP
 sleep 0.7
 
 # CPU CLOCK A57
+
+elif [ "$1" = "A57-200" ]; then
+	echo "kernel.cpu.a57.min=200000" >> $PROP
+
+elif [ "$1" = "A57-300" ]; then
+	echo "kernel.cpu.a57.min=300000" >> $PROP
+
+elif [ "$1" = "A57-400" ]; then
+	echo "kernel.cpu.a57.min=400000" >> $PROP
+
+elif [ "$1" = "A57-500" ]; then
+	echo "kernel.cpu.a57.min=500000" >> $PROP
+
+elif [ "$1" = "A57-600" ]; then
+	echo "kernel.cpu.a57.min=600000" >> $PROP
+
+elif [ "$1" = "A57-700" ]; then
+	echo "kernel.cpu.a57.min=700000" >> $PROP
+
 elif [ "$1" = "A57-800" ]; then
 	echo "kernel.cpu.a57.min=800000" >> $PROP
 
@@ -135,9 +164,15 @@ elif [ "$1" = "A57-2000" ]; then
 
 elif [ "$1" = "A57-2100" ]; then
 	echo "kernel.cpu.a57.max=2100000" >> $PROP
+
+elif [ "$1" = "A57-2200" ]; then
+	echo "kernel.cpu.a57.max=2200000" >> $PROP
+
+elif [ "$1" = "A57-2304" ]; then
+	echo "kernel.cpu.a57.max=2304000" >> $PROP
 sleep 0.7
 
-# TCP Congestion Controller
+# TCP CONGESTION CONTROLLER
 elif [ "$1" = "TCP-BIC" ]; then
 	echo "kernel.tcp.cong=bic" >> $PROP
 
