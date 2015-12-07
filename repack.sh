@@ -11,7 +11,7 @@ export ZIP_DIR=zip_files
 export MODULES_DIR=build_image/zip_files/system/lib/modules/
 export DEVELOPER="Hybridmax"
 export DEVICE="S6"
-export VERSION_NUMBER="Alpha-2"
+export VERSION_NUMBER="v2-Beta1"
 export HYBRIDVER="$DEVELOPER-Kernel-$DEVICE-$VERSION_NUMBER-($CURDATE)"
 export KERNEL_NAME="$HYBRIDVER"
 
