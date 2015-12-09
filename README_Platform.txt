@@ -75,5 +75,9 @@ PRODUCT_PACKAGES += \
 4. excute build command
    ./build_64bit.sh user
 
-Note : 
- You can download the Sbrowser source code from the site below: http://opensource.samsung.com
+Note :
+   To download the source code of S/W listed below, please visit http://opensource.samsung.com and find ��Mobile -> Mobile Application�� menu, 
+   and then, you will be able to download what you want. 
+   You might save time in finding the right one by making use of the search keyword below. 
+   - SBrowser : "SBrowser"
+   - VoiceNote4Z_32 : "Voice Recorder"
