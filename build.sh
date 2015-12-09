@@ -11,7 +11,7 @@ export BUILD_IMG=build_image
 export KERNEL_DEFCONFIG=hybridmax_uni_defconfig
 export DEVELOPER="Hybridmax"
 export DEVICE="S6"
-export VERSION_NUMBER="UNI-v2-Beta2"
+export VERSION_NUMBER="UNI-v2-Beta3"
 export KERNELNAME="$DEVELOPER-$DEVICE-$VERSION_NUMBER"
 export HYBRIDVER="-$KERNELNAME"
 
