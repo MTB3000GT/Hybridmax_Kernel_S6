@@ -72,6 +72,8 @@ void set_core_flag_down(unsigned int cpu, unsigned int val);
 static unsigned int kt_cpu_core_smp_status[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 extern unsigned int cpu_core_smp_status[];
 static unsigned int cpus_online;	/* number of CPUs using this policy */
+bool force_cores_down[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+
 /*
  * The polling frequency of this governor depends on the capability of
  * the processor. Default polling frequency is 1000 times the transition
@@ -2149,12 +2151,14 @@ void ktoonservative_screen_is_on(bool state, int cpu)
 			if ((hotplug_cpu_lockout[cpuloop] == 2 || tunables->no_extra_cores_screen_off) && !main_cpufreq_control[cpuloop])
 			{
 				set_core_flag_down(cpuloop, 1);
+				force_cores_down[cpuloop] = 1;
 				need_to_queue_down = true;
 			}
 		}
 		if (need_to_queue_up)
 			queue_work_on(0, dbs_wq, &hotplug_online_work);
 		if (need_to_queue_down)
+		{
 			queue_work_on(0, dbs_wq, &hotplug_offline_work);
 
 		boost_the_gpu(tunables->touch_boost_gpu, false);
@@ -2245,7 +2249,7 @@ static void __cpuinit hotplug_offline_work_fn(struct work_struct *work)
 
 	for (cpu = CPUS_AVAILABLE-1; cpu > 0; cpu--)
 	{
-		if ((cpu_online(cpu) && (cpu)) || force_cores_down[cpu]) {
+		if (likely(cpu_online(cpu) && (cpu))) {
 			if ((hotplug_cpu_single_down[cpu] && !hotplug_cpu_single_up[cpu] && !main_cpufreq_control[cpu]) || force_cores_down[cpu])
 			{
 				if (debug_is_enabled)
@@ -2256,6 +2260,8 @@ static void __cpuinit hotplug_offline_work_fn(struct work_struct *work)
 		}
 		if (hotplug_cpu_single_up[cpu])
 			set_core_flag_up(cpu, 0);
+		if (force_cores_down[cpu])
+			force_cores_down[cpu] = 0;
 	}
 	hotplugInProgress = false;
 }
@@ -2266,12 +2272,15 @@ static void __cpuinit hotplug_online_work_fn(struct work_struct *work)
 
 	for_each_possible_cpu(cpu) {
 		if (likely(!cpu_online(cpu) && (cpu))) {
-			if (hotplug_cpu_single_up[cpu] && !hotplug_cpu_single_down[cpu])
+			if (cpu <= 4 || (cpu > 4 && cpu_online(4)))
 			{
-				if (debug_is_enabled)
-					pr_alert("BOOST CORES UP WORK FUNC %d - %d - %d - %d - %d - %d - %d - %d\n", cpu, hotplug_cpu_single_up[1], hotplug_cpu_single_up[2], hotplug_cpu_single_up[3], hotplug_cpu_single_up[4], hotplug_cpu_single_up[5], hotplug_cpu_single_up[6], hotplug_cpu_single_up[7]);
-				cpu_up(cpu);
-				set_core_flag_up(cpu, 0);
+				if (hotplug_cpu_single_up[cpu] && !hotplug_cpu_single_down[cpu])
+				{
+					if (debug_is_enabled)
+						pr_alert("BOOST CORES UP WORK FUNC %d - %d - %d - %d - %d - %d - %d - %d\n", cpu, hotplug_cpu_single_up[1], hotplug_cpu_single_up[2], hotplug_cpu_single_up[3], hotplug_cpu_single_up[4], hotplug_cpu_single_up[5], hotplug_cpu_single_up[6], hotplug_cpu_single_up[7]);
+					cpu_up(cpu);
+					set_core_flag_up(cpu, 0);
+				}
 			}
 		}
 		if (hotplug_cpu_single_down[cpu])
