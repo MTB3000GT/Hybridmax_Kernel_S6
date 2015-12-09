@@ -1485,7 +1485,7 @@ int __cpufreq_driver_target(struct cpufreq_policy *policy,
 
 	if (cpufreq_disabled())
 		return -ENODEV;
-
+	
 	/* Make sure that target_freq is within supported range */
 	if (target_freq > policy->max)
 		target_freq = policy->max;
