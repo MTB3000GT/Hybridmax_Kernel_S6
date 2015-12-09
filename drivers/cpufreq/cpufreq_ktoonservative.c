@@ -2245,8 +2245,8 @@ static void __cpuinit hotplug_offline_work_fn(struct work_struct *work)
 
 	for (cpu = CPUS_AVAILABLE-1; cpu > 0; cpu--)
 	{
-		if (likely(cpu_online(cpu) && (cpu))) {
-			if (hotplug_cpu_single_down[cpu] && !hotplug_cpu_single_up[cpu] && !main_cpufreq_control[cpu])
+		if ((cpu_online(cpu) && (cpu)) || force_cores_down[cpu]) {
+			if ((hotplug_cpu_single_down[cpu] && !hotplug_cpu_single_up[cpu] && !main_cpufreq_control[cpu]) || force_cores_down[cpu])
 			{
 				if (debug_is_enabled)
 					pr_alert("BOOST CORES DOWN WORK FUNC %d - %d - %d - %d\n", cpu, hotplug_cpu_single_down[1], hotplug_cpu_single_down[2], hotplug_cpu_single_down[3]);
