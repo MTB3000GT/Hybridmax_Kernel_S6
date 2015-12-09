@@ -34,6 +34,32 @@
 
 #include <trace/events/power.h>
 
+unsigned int GLOBALKT_MIN_FREQ_LIMIT[] = { 400000, 400000, 400000, 400000, 800000, 800000, 800000, 800000 };
+unsigned int GLOBALKT_MAX_FREQ_LIMIT[] = { 1500000, 1500000, 1500000, 1500000, 2100000, 2100000, 2100000, 2100000 };
+unsigned int CPUINFO_MIN_FREQ_LIMIT[] = { 200000, 200000, 200000, 200000, 200000, 200000, 200000, 200000 };
+unsigned int CPUINFO_MAX_FREQ_LIMIT[] = { 1600000, 1600000, 1600000, 1600000, 2496000, 2496000, 2496000, 2496000 };
+unsigned int main_cpufreq_control[8];
+unsigned int vfreq_lock = 0;
+static bool vfreq_lock_tempOFF = false;
+static unsigned int Lscreen_off_scaling_enable = 0;
+static unsigned int Lscreen_off_scaling_mhz_cl0 = 1500000;
+static unsigned int Lscreen_off_scaling_mhz_orig_cl0 = 1500000;
+static unsigned int Lscreen_off_scaling_mhz_cl1 = 2100000;
+static unsigned int Lscreen_off_scaling_mhz_orig_cl1 = 2100000;
+
+struct hotplug_data {
+	struct work_struct hotplug_work;
+	unsigned int work_speed_min;
+	unsigned int work_speed_max;
+	unsigned int work_speed_core_start;
+	unsigned int work_speed_core_stop;
+	unsigned int work_screen_going_off;
+};
+static struct hotplug_data *hotplug_data_cl0;
+static struct hotplug_data *hotplug_data_cl1;
+
+static struct workqueue_struct *dbs_wq;
+
 /**
  * The "cpufreq driver" - the arch- or hardware-dependent low
  * level driver of CPUFreq support, and its spinlock. This lock
@@ -444,8 +470,146 @@ static ssize_t store_##file_name					\
 	return ret ? ret : count;					\
 }
 
-store_one(scaling_min_freq, min);
-store_one(scaling_max_freq, max);
+static void __cpuinit set_cpu_min_max_work_fn(struct work_struct *work)
+{
+	struct hotplug_data *data = container_of(work, struct hotplug_data, hotplug_work);
+	if (data->work_speed_min > 0 || data->work_speed_max > 0)
+	{
+		struct cpufreq_policy new_policy;
+		int cpu, ret;
+		for (cpu = data->work_speed_core_start; cpu <= data->work_speed_core_stop; cpu++)
+		{
+			bool broughtCoreup = false;
+			main_cpufreq_control[cpu] = 1;
+			if (!cpu_online(cpu))
+			{
+				cpu_up(cpu);
+				broughtCoreup = true;
+			}
+			//usleep(50);
+			if (cpu_online(cpu))
+			{
+				struct cpufreq_policy *policyorig = cpufreq_cpu_get_sysfs(cpu);
+				//pr_alert("SET EXTRA CORES 1 - %d - %d - %d", cpu, data->work_speed_min, data->work_speed_max);
+				if (policyorig)
+				{
+					ret = cpufreq_get_policy(&new_policy, cpu);
+					if (data->work_speed_min)
+					{
+						new_policy.min = data->work_speed_min;
+						policyorig->user_policy.min = new_policy.min;
+						new_policy.user_policy.min = new_policy.min;
+					}
+					if (data->work_speed_max)
+					{
+						new_policy.max = data->work_speed_max;
+						policyorig->user_policy.max = new_policy.max;
+						new_policy.user_policy.max = new_policy.max;
+					}
+					//pr_alert("SET EXTRA CORES 2 - %d - %d - %d - %d - %d - %d - %d", cpu, policyorig->cpu, new_policy.min, new_policy.max, policyorig->min, policyorig->max, policyorig->user_policy.max);
+					if (cpu_online(cpu))
+					{
+						__cpufreq_set_policy(policyorig, &new_policy);
+						if (data->work_speed_min)
+							policyorig->user_policy.min = policyorig->min;
+						if (data->work_speed_max)
+							policyorig->user_policy.max = policyorig->max;
+					}
+					//pr_alert("SET EXTRA CORES 3 - %d - %d - %d - %d - %d - %d - %d", cpu, policyorig->cpu, new_policy.min, new_policy.max, policyorig->min, policyorig->max, policyorig->user_policy.max);
+				}
+			}
+			if (broughtCoreup && data->work_screen_going_off == 1)
+				cpu_down(cpu);				
+			main_cpufreq_control[cpu] = 0;
+		}
+	}
+	if (ktoonservative_is_active && data->work_speed_core_start == 4)
+	{
+		if (data->work_screen_going_off == 1)
+		{
+			pr_alert("KT GOT SCREEN OFF\n");
+			ktoonservative_screen_is_on(false, 0);
+			screen_is_on = false;
+		}
+		else if (data->work_screen_going_off == 0)
+		{
+			pr_alert("KT GOT SCREEN ON\n");
+			ktoonservative_screen_is_on(true, 0);
+			screen_is_on = true;
+		}
+	}
+}
+
+static void set_cpu_min_max(unsigned int min, unsigned int max, unsigned int core_start, unsigned int core_stop, unsigned int screen_going_off, struct hotplug_data *data)
+{
+	data->work_speed_min = min;
+	data->work_speed_max = max;
+	data->work_speed_core_start = core_start;
+	data->work_speed_core_stop = core_stop;
+	data->work_screen_going_off = screen_going_off;
+	queue_work_on(0, dbs_wq, &data->hotplug_work);
+}
+
+static ssize_t show_screen_off_scaling_enable(struct cpufreq_policy *policy, char *buf)
+{
+	return sprintf(buf, "%u\n", Lscreen_off_scaling_enable);
+}
+static ssize_t store_screen_off_scaling_enable(struct cpufreq_policy *policy,
+					const char *buf, size_t count)
+{
+	unsigned int value = 0;
+	unsigned int ret;
+	ret = sscanf(buf, "%u", &value);
+	if (value > 1)
+	    value = 1;
+	Lscreen_off_scaling_enable = value;
+
+	return count;
+}
+
+static ssize_t show_screen_off_scaling_mhz_cl0(struct cpufreq_policy *policy, char *buf)
+{
+	return sprintf(buf, "%u\n", Lscreen_off_scaling_mhz_cl0);
+}
+
+static ssize_t show_screen_off_scaling_mhz_cl1(struct cpufreq_policy *policy, char *buf)
+{
+	return sprintf(buf, "%u\n", Lscreen_off_scaling_mhz_cl1);
+}
+
+static ssize_t store_screen_off_scaling_mhz_cl0(struct cpufreq_policy *policy,
+					const char *buf, size_t count)
+{
+	unsigned int value = 0;
+	unsigned int ret;
+	ret = sscanf(buf, "%u", &value);
+	//pr_alert("SCREEN OFF SCALING - 1 MHZ-CL0: %u\n", value);
+	if (value > GLOBALKT_MAX_FREQ_LIMIT[policy->cpu])
+		value = GLOBALKT_MAX_FREQ_LIMIT[policy->cpu];
+	if (value < GLOBALKT_MIN_FREQ_LIMIT[policy->cpu])
+		value = GLOBALKT_MIN_FREQ_LIMIT[policy->cpu];
+	Lscreen_off_scaling_mhz_cl0 = value;
+	//pr_alert("SCREEN OFF SCALING - 2 MHZ-CL0: %u\n", value);
+
+	return count;
+}
+
+static ssize_t store_screen_off_scaling_mhz_cl1(struct cpufreq_policy *policy,
+					const char *buf, size_t count)
+{
+	unsigned int value = 0;
+	unsigned int ret;
+	ret = sscanf(buf, "%u", &value);
+	//pr_alert("SCREEN OFF SCALING - 1 MHZ-CL1: %u\n", value);
+	if (value > GLOBALKT_MAX_FREQ_LIMIT[policy->cpu])
+		value = GLOBALKT_MAX_FREQ_LIMIT[policy->cpu];
+	if (value < GLOBALKT_MIN_FREQ_LIMIT[policy->cpu])
+		value = GLOBALKT_MIN_FREQ_LIMIT[policy->cpu];
+	Lscreen_off_scaling_mhz_cl1 = value;
+	//pr_alert("SCREEN OFF SCALING - 2 MHZ-CL1: %u\n", value);
+
+	return count;
+}
 
 /**
  * show_cpuinfo_cur_freq - current CPU frequency as detected by hardware
@@ -1884,6 +2048,64 @@ no_policy:
 	return ret;
 }
 EXPORT_SYMBOL(cpufreq_update_policy);
+
+void cpufreq_gov_resume(void)
+{
+	if (Lscreen_off_scaling_enable == 1)
+	{
+		if (vfreq_lock == 1)
+		{
+			vfreq_lock = 0;
+			vfreq_lock_tempOFF = true;
+		}
+		set_cpu_min_max(0, Lscreen_off_scaling_mhz_orig_cl0, 0, 0, 0, hotplug_data_cl0);
+		//pr_alert("CPUFREQ_GOV_RESUME_FREQ-CL0: %u\n", Lscreen_off_scaling_mhz_orig_cl0);
+		set_cpu_min_max(0, Lscreen_off_scaling_mhz_orig_cl1, 4, 4, 0, hotplug_data_cl1);
+		//pr_alert("CPUFREQ_GOV_RESUME_FREQ-CL1: %u\n", Lscreen_off_scaling_mhz_orig_cl1);
+	}
+	else
+	{
+		if (ktoonservative_is_active)
+		{
+			pr_alert("KT GOT SCREEN OFF\n");
+			ktoonservative_screen_is_on(true, 0);
+		}
+		screen_is_on = true;
+	}
+}
+
+void cpufreq_gov_suspend(void)
+{
+	if (Lscreen_off_scaling_enable == 1)
+	{
+		if (vfreq_lock == 1)
+		{
+			vfreq_lock = 0;
+			vfreq_lock_tempOFF = true;
+		}
+		set_cpu_min_max(0, Lscreen_off_scaling_mhz_cl0, 0, 0, 1, hotplug_data_cl0);
+		//pr_alert("CPUFREQ_GOV_SUSPEND_FREQ-CL0: %u\n", Lscreen_off_scaling_mhz_cl0);
+		set_cpu_min_max(0, Lscreen_off_scaling_mhz_cl1, 4, 4, 1, hotplug_data_cl1);
+		//pr_alert("CPUFREQ_GOV_SUSPEND_FREQ-CL1: %u\n", Lscreen_off_scaling_mhz_cl1);
+	}
+	else
+	{
+		if (ktoonservative_is_active)
+		{
+			pr_alert("KT GOT SCREEN ON\n");
+			ktoonservative_screen_is_on(false, 0);
+		}
+		screen_is_on = false;
+	}
+}
+
+void cpufreq_screen_is_on(bool state)
+{
+	if (state)
+		cpufreq_gov_resume();
+	else
+		cpufreq_gov_suspend();
+}
 
 static int __cpuinit cpufreq_cpu_callback(struct notifier_block *nfb,
 					unsigned long action, void *hcpu)
