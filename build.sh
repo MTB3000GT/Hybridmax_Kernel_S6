@@ -11,7 +11,7 @@ export BUILD_IMG=build_image
 export KERNEL_DEFCONFIG=hybridmax_uni_defconfig
 export DEVELOPER="Hybridmax"
 export DEVICE="S6"
-export VERSION_NUMBER="UNI-v2-Beta3"
+export VERSION_NUMBER="UNI-v2-Beta4"
 export KERNELNAME="$DEVELOPER-$DEVICE-$VERSION_NUMBER"
 export HYBRIDVER="-$KERNELNAME"
 
@@ -58,11 +58,11 @@ BUILD_KERNEL()
 # build_vars
         export ARCH=arm64
         export SUBARCH=arm64
-#       export USE_CCACHE=1
+        export USE_CCACHE=1
 #       export USE_SEC_FIPS_MODE=true
 #       export KCONFIG_NOTIMESTAMP=true
         export CROSS_COMPILE=$BCC
-#       export ENABLE_GRAPHITE=true
+        export ENABLE_GRAPHITE=true
         make ARCH=arm64 $KERNEL_DEFCONFIG
         sed -i 's,CONFIG_LOCALVERSION="-Hybridmax",CONFIG_LOCALVERSION="'$HYBRIDVER'",' .config
         make ARCH=arm64 -j$CPU_JOB_NUM

@@ -232,6 +232,12 @@ elif [ "`grep "kernel.scheduler=cfg" $PROP`" != "" ]; then
     	echo "cfq" > /sys/block/sdb/queue/scheduler
     	echo "cfq" > /sys/block/sdc/queue/scheduler
     	echo "cfq" > /sys/block/vnswap0/queue/scheduler
+elif [ "`grep "kernel.scheduler=row" $PROP`" != "" ]; then
+	echo "row" > /sys/block/mmcblk0/queue/scheduler
+    	echo "row" > /sys/block/sda/queue/scheduler
+    	echo "row" > /sys/block/sdb/queue/scheduler
+    	echo "row" > /sys/block/sdc/queue/scheduler
+    	echo "row" > /sys/block/vnswap0/queue/scheduler
 else
 	echo "cfq" > /sys/block/mmcblk0/queue/scheduler
     	echo "cfq" > /sys/block/sda/queue/scheduler

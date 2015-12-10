@@ -239,6 +239,11 @@ if file_getprop("/tmp/aroma-data/scheduler.prop","selected.1") == "5" then
 	run_program("/tmp/aroma.sh", "NOOP");
 endif;
 
+if file_getprop("/tmp/aroma-data/scheduler.prop","selected.1") == "6" then
+	ui_print("--- Row Scheduler");
+	run_program("/tmp/aroma.sh", "ROW");
+endif;
+
 run_program("/tmp/aroma.sh", "WAIT");
 set_progress(0.5);
 

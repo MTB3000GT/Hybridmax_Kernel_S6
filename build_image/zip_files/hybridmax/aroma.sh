@@ -86,6 +86,9 @@ elif [ "$1" = "FIOPS" ]; then
 elif [ "$1" = "NOOP" ]; then
 	echo "kernel.scheduler=noop" >> $PROP
 
+elif [ "$1" = "ROW" ]; then
+	echo "kernel.scheduler=row" >> $PROP
+
 # GOVERNORS
 elif [ "$1" = "CONSERVATIVE" ]; then
 	echo "kernel.governor=conservative" >> $PROP
